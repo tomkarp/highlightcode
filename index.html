@@ -296,6 +296,9 @@ print(greet("Anna"))</textarea>  <div class="controls">
         // JSON
         { lang: 'json', regex: /^\s*[\{\[][\s\S]*[\}\]]\s*$/m },
         
+        // Python - erweiterte Erkennung (vor JavaScript prüfen!)
+        { lang: 'python', regex: /def\s+\w+|import\s+\w+|from\s+\w+\s+import|if\s+__name__\s*==|print\s*\(|:\s*$|#\s*=+|elif\s+|range\s*\(|len\s*\(|str\s*\(|int\s*\(|float\s*\(|\w+\s*\+=|\w+\s*\*=|\/\/\s*\d|#.*==>|input\s*\(/m },
+        
         // TypeScript (vor JavaScript prüfen)
         { lang: 'typescript', regex: /interface\s+\w+|type\s+\w+\s*=|:\s*(string|number|boolean|any)\s*[;,\)\{]|<.*>\s*\(/i },
         
@@ -307,9 +310,6 @@ print(greet("Anna"))</textarea>  <div class="controls">
         
         // Kotlin
         { lang: 'kotlin', regex: /fun\s+\w+|val\s+\w+|var\s+\w+|class\s+\w+.*\{|println\(/i },
-        
-        // Python
-        { lang: 'python', regex: /def\s+\w+|import\s+\w+|from\s+\w+\s+import|if\s+__name__\s*==|print\s*\(|:\s*$/m },
         
         // Elm
         { lang: 'elm', regex: /module\s+\w+|import\s+\w+(\.\w+)*|type\s+(alias\s+)?\w+|->|case\s+\w+\s+of/i }

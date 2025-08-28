@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Code Syntax Highlighter - Inline Styles Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-clike.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-java.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-kotlin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-markup.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-css.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-elm.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      font-weight: 300;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #7f8c8d;
+      margin-bottom: 40px;
+      font-size: 1.1em;
+    }
+    
+    h2 {
+      color: #34495e;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 5px;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      font-weight: 400;
+    }
+    
+    .controls {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    label {
+      font-weight: 500;
+      color: #555;
+    }
+    
+    select, input[type="checkbox"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    select {
+      background: white;
+    }
+    
+    textarea {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      resize: vertical;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+    
+    #preview {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+    
+    .output-section {
+      position: relative;
+    }
+    
+    .copy-button {
+      position: absolute;
+      top: 50px;
+      right: 15px;
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      z-index: 10;
+    }
+    
+    .copy-button:hover {
+      background: #2980b9;
+    }
+    
+    .copy-button:active {
+      background: #27ae60;
+    }
+    
+    .copy-button.success {
+      background: #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Code Syntax Highlighter</h1>
+  <p class="subtitle">Generate HTML code with syntax highlighting </p>
+
+  <h2>📝 Enter Source Code</h2>
+
+  <textarea id="input" rows="10" style="width: 100%; box-sizing: border-box;" placeholder="Paste your code here..."># Simple Python Example
+def greet(name):
+    return "Hello " + name
+
+# Output
+print(greet("Anna"))</textarea>  <div class="controls">
+    <div class="control-group">
+      <label for="lang">Language:</label>
+      <select id="lang">
+        <option value="css">CSS</option>
+        <option value="elm">Elm</option>
+        <option value="html">HTML</option>
+        <option value="java">Java</option>
+        <option value="javascript">JavaScript</option>
+        <option value="json">JSON</option>
+        <option value="kotlin">Kotlin</option>
+        <option value="python" selected>Python</option>
+        <option value="typescript">TypeScript</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="theme">Theme:</label>
+      <select id="theme">
+        <option value="light">Light</option>
+        <option value="dark" selected>Dark</option>
+        <option value="clean">Clean (transparent)</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="lineNumbers">
+        <input type="checkbox" id="lineNumbers" checked> Show line numbers
+      </label>
+    </div>
+  </div>
+
+  <h2>👁️ Preview</h2>
+  <div id="preview"></div>
+
+  <div class="output-section">
+    <h2>📋 HTML Code</h2>
+    <button class="copy-button" onclick="copyToClipboard()">📄 Copy</button>
+    <textarea id="output" rows="20" style="width: 100%; box-sizing: border-box;" readonly></textarea>
+  </div>
+
+  <script>
+    // Copy function
+    function copyToClipboard() {
+      const output = document.getElementById("output");
+      output.select();
+      output.setSelectionRange(0, 99999); // For mobile devices
+      
+      try {
+        document.execCommand('copy');
+        const button = document.querySelector('.copy-button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '✅ Copied!';
+        button.classList.add('success');
+        
+        setTimeout(() => {
+          button.innerHTML = originalText;
+          button.classList.remove('success');
+        }, 2000);
+      } catch (err) {
+        console.error('Copy failed:', err);
+      }
+      
+      // Remove selection
+      output.blur();
+    }
+
+    // Farb-Mapping (Drei Themes)
+    const colors = {
+      light: {
+        "comment": "slategray",
+        "punctuation": "#999",
+        "keyword": "#07a",
+        "string": "#690",
+        "function": "#DD4A68",
+        "class-name": "#DD4A68",
+        "number": "#905",
+        "operator": "#9a6e3a",
+        // HTML/Markup spezifische Token
+        "tag": "#d73a49",
+        "attr-name": "#005cc5",
+        "attr-value": "#690",
+        "namespace": "#e36209",
+        "prolog": "#999",
+        "doctype": "#999",
+        "cdata": "#999"
+      },
+      dark: {
+        "comment": "#999",
+        "punctuation": "#ccc",
+        "keyword": "#cc99cd",
+        "string": "#7ec699",
+        "function": "#f08d49",
+        "class-name": "#f8c555",
+        "number": "#f08d49",
+        "operator": "#67cdcc",
+        // HTML/Markup spezifische Token
+        "tag": "#ff6b6b",
+        "attr-name": "#4ecdc4",
+        "attr-value": "#7ec699",
+        "namespace": "#ffa726",
+        "prolog": "#999",
+        "doctype": "#999",
+        "cdata": "#999"
+      },
+      clean: {
+        "comment": "#6a737d",
+        "punctuation": "#24292e",
+        "keyword": "#d73a49",
+        "string": "#032f62",
+        "function": "#6f42c1",
+        "class-name": "#6f42c1",
+        "number": "#005cc5",
+        "operator": "#d73a49",
+        // HTML/Markup spezifische Token
+        "tag": "#22863a",
+        "attr-name": "#6f42c1",
+        "attr-value": "#032f62",
+        "namespace": "#e36209",
+        "prolog": "#6a737d",
+        "doctype": "#6a737d",
+        "cdata": "#6a737d"
+      }
+    };
+
+    function applyInlineStyles(html, theme) {
+      return html.replace(/class="token ([^"]+)"/g, (match, cls) => {
+        const color = colors[theme][cls];
+        return color ? `style="color:${color};"` : "";
+      });
+    }
+
+    // Automatische Spracherkennung basierend auf Code-Mustern
+    function detectLanguage(code) {
+      const patterns = [
+        // HTML - muss vor anderen stehen
+        { lang: 'html', regex: /<!DOCTYPE|<html|<\/html>|<head>|<body>|<div|<span|<p>|<a\s+href/i },
+        
+        // CSS
+        { lang: 'css', regex: /\{[^}]*[a-zA-Z-]+\s*:\s*[^}]+\}|@media|@import|@keyframes/i },
+        
+        // JSON
+        { lang: 'json', regex: /^\s*[\{\[][\s\S]*[\}\]]\s*$/m },
+        
+        // TypeScript (vor JavaScript prüfen)
+        { lang: 'typescript', regex: /interface\s+\w+|type\s+\w+\s*=|:\s*(string|number|boolean|any)\s*[;,\)\{]|<.*>\s*\(/i },
+        
+        // JavaScript
+        { lang: 'javascript', regex: /function\s*\w*\s*\(|=>\s*\{?|console\.(log|error)|document\.|window\.|var\s+|let\s+|const\s+/i },
+        
+        // Java
+        { lang: 'java', regex: /public\s+(class|static|void)|private\s+|System\.out\.println|import\s+java\./i },
+        
+        // Kotlin
+        { lang: 'kotlin', regex: /fun\s+\w+|val\s+\w+|var\s+\w+|class\s+\w+.*\{|println\(/i },
+        
+        // Python
+        { lang: 'python', regex: /def\s+\w+|import\s+\w+|from\s+\w+\s+import|if\s+__name__\s*==|print\s*\(|:\s*$/m },
+        
+        // Elm
+        { lang: 'elm', regex: /module\s+\w+|import\s+\w+(\.\w+)*|type\s+(alias\s+)?\w+|->|case\s+\w+\s+of/i }
+      ];
+
+      for (const pattern of patterns) {
+        if (pattern.regex.test(code)) {
+          return pattern.lang;
+        }
+      }
+      
+      return null; // Keine Sprache erkannt
+    }
+
+    function updateHighlight() {
+      const code = document.getElementById("input").value;
+      const lang = document.getElementById("lang").value;
+      const theme = document.getElementById("theme").value;
+      const showLineNumbers = document.getElementById("lineNumbers").checked;
+      
+      // Früh beenden wenn kein Code vorhanden
+      if (!code.trim()) return;
+      
+      // HTML wird in Prism.js als "markup" bezeichnet
+      const prismLang = lang === "html" ? "markup" : lang;
+      const grammar = Prism.languages[prismLang];
+      if (!grammar) return;
+
+      let highlighted = Prism.highlight(code, grammar, prismLang);
+      highlighted = applyInlineStyles(highlighted, theme);
+
+      // Theme-spezifische Hintergrund- und Textfarben
+      const themeColors = {
+        light: { bg: "#f5f2f0", fg: "black" },
+        dark: { bg: "#2d2d2d", fg: "#ccc" },
+        clean: { bg: "transparent", fg: "#24292e" }
+      };
+      
+      const bg = themeColors[theme].bg;
+      const fg = themeColors[theme].fg;
+
+      let result;
+      
+      if (showLineNumbers) {
+        const lines = highlighted.split('\n');
+        
+        // Theme-spezifische Zeilennummern-Farben
+        const lineNumberColors = {
+          light: "#999",
+          dark: "#666", 
+          clean: "#666"
+        };
+        
+        const lineNumberColor = lineNumberColors[theme];
+        
+        const numberedLines = lines.map((line, index) => {
+          const lineNum = index + 1;
+          return `<span style="color:${lineNumberColor}; padding:0 8px; margin-right:10px; user-select:none; display:inline-block; width:30px; text-align:right;">${lineNum}</span>${line}`;
+        }).join('\n');
+
+        result = `<pre style="background:${bg}; 
+           color:${fg}; 
+           font-family:Consolas,Monaco,monospace; 
+           padding:0.5em; 
+           border-radius:6px; 
+           line-height:1.5;">
+<code>${numberedLines}</code>
+</pre>`;
+      } else {
+        result = `<pre style="background:${bg}; 
+           color:${fg}; 
+           font-family:Consolas,Monaco,monospace; 
+           padding:0.5em; 
+           border-radius:6px;">
+<code>${highlighted}</code>
+</pre>`;
+      }
+
+      document.getElementById("output").value = result;
+      document.getElementById("preview").innerHTML = result;
+    }
+
+    // Store example code
+    const exampleCode = `# Simple Python Example
+def greet(name):
+    return "Hello " + name
+
+# Output
+print(greet("Anna"))`;
+
+    // Variable to track if example is still active
+    let isExampleActive = true;
+    // Variable to track if user has manually interacted
+    let userHasInteracted = false;
+
+    // Function to handle input
+    function handleInput() {
+      const input = document.getElementById("input");
+      const currentValue = input.value;
+      
+      // Mark that user has interacted if they changed anything
+      if (currentValue !== exampleCode) {
+        userHasInteracted = true;
+      }
+      
+      // Only show example again if user hasn't interacted yet
+      if (currentValue === "" && !userHasInteracted) {
+        input.value = exampleCode;
+        isExampleActive = true;
+      }
+      // If text is entered and it's not the example, deactivate example
+      else if (currentValue !== exampleCode) {
+        isExampleActive = false;
+        
+        // Automatic language detection only for new code (not example)
+        const detectedLang = detectLanguage(currentValue);
+        if (detectedLang) {
+          const langSelect = document.getElementById("lang");
+          if (langSelect.value !== detectedLang) {
+            langSelect.value = detectedLang;
+            // Small visual hint
+            langSelect.style.backgroundColor = '#e8f5e8';
+            setTimeout(() => {
+              langSelect.style.backgroundColor = '';
+            }, 1000);
+          }
+        }
+      }
+      
+      updateHighlight();
+    }
+
+    // Function for focus event - clear example on click
+    function handleFocus() {
+      const input = document.getElementById("input");
+      if (isExampleActive) {
+        input.value = "";
+        isExampleActive = false;
+        userHasInteracted = true; // Mark that user has now interacted
+        updateHighlight();
+      }
+    }
+
+    // Live updates
+    document.getElementById("input").addEventListener("input", handleInput);
+    document.getElementById("input").addEventListener("focus", handleFocus);
+    document.getElementById("lang").addEventListener("change", updateHighlight);
+    document.getElementById("theme").addEventListener("change", updateHighlight);
+    document.getElementById("lineNumbers").addEventListener("change", updateHighlight);
+
+    // Initial setup: set example and then highlight
+    const input = document.getElementById("input");
+    if (input.value.trim() === "") {
+      input.value = exampleCode;
+      isExampleActive = true;
+    }
+    updateHighlight();
+  </script>
+</body>
+</html>

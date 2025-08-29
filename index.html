@@ -355,21 +355,19 @@ print(greet("Anna"))</textarea>  <div class="controls">
       
       if (showLineNumbers) {
         const lines = highlighted.split('\n');
-        
         // Theme-spezifische Zeilennummern-Farben
         const lineNumberColors = {
           light: "#999",
-          dark: "#666", 
+          dark: "#666",
           clean: "#666"
         };
-        
         const lineNumberColor = lineNumberColors[theme];
-        
+        // Inline-Styles für Zeilennummern (user-select:none, pointer-events:none, etc.)
+        const lineNumberStyle = `color:${lineNumberColor};padding:0 8px;margin-right:10px;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;pointer-events:none;display:inline-block;width:30px;text-align:right;`;
         const numberedLines = lines.map((line, index) => {
           const lineNum = index + 1;
-          return `<span style="color:${lineNumberColor}; padding:0 8px; margin-right:10px; user-select:none; display:inline-block; width:30px; text-align:right;">${lineNum}</span>${line}`;
+          return `<span style=\"${lineNumberStyle}\">${lineNum}</span>${line}`;
         }).join('\n');
-
         result = `<pre style="background:${bg}; 
            color:${fg}; 
            font-family:Consolas,Monaco,monospace; 

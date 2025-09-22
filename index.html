@@ -192,19 +192,19 @@ print(greet("Anna"))</textarea>  <div class="controls">
 
   <div class="output-section">
     <h2>📋 HTML Code</h2>
-    <button class="copy-button" onclick="copyToClipboard()">📄 Copy Html Code</button>
+  <button class="copy-button" onclick="copyToClipboard(event)">📄 Copy Html Code</button>
     <textarea id="output" rows="20" style="width: 100%; box-sizing: border-box;" readonly></textarea>
   </div>
 
   <script>
     // Copy function
-    function copyToClipboard() {
+    function copyToClipboard(event) {
       const output = document.getElementById("output");
       output.select();
       output.setSelectionRange(0, 99999); // For mobile devices
+      let button = event && event.target ? event.target : document.querySelector('.copy-button');
       try {
         document.execCommand('copy');
-        const button = document.querySelector('.copy-button');
         const originalText = button.innerHTML;
         button.innerHTML = '✅ Copied!';
         button.classList.add('success');

@@ -349,34 +349,39 @@ print(greet("Anna"))</textarea>  <div class="controls">
       const patterns = [
         // HTML - muss vor anderen stehen
         { lang: 'html', regex: /<!DOCTYPE|<html|<\/html>|<head>|<body>|<div|<span|<p>|<a\s+href/i },
-        
+
         // CSS
         { lang: 'css', regex: /\{[^}]*[a-zA-Z-]+\s*:\s*[^}]+\}|@media|@import|@keyframes/i },
-        
-        // JSON
-        { lang: 'json', regex: /^\s*[\{\[][\s\S]*[\}\]]\s*$/m },
-        
-        // Python - erweiterte Erkennung (vor JavaScript prüfen!)
-        { lang: 'python', regex: /def\s+\w+|import\s+\w+|from\s+\w+\s+import|if\s+__name__\s*==|print\s*\(|:\s*$|#\s*=+|elif\s+|range\s*\(|len\s*\(|str\s*\(|int\s*\(|float\s*\(|\w+\s*\+=|\w+\s*\*=|\/\/\s*\d|#.*==>|input\s*\(/m },
-        
+
+        // JSON (nur wenn keine Java-Schlüsselwörter enthalten sind)
+        { lang: 'json', regex: /^\s*[\{\[][\s\S]*[\}\]]\s*$/m,
+          exclude: /(class\s+|public\s+|private\s+|import\s+|package\s+)/ },
+
+        // Java - vor Python!
+        { lang: 'java', regex: /public\s+(class|static|void)|private\s+|System\.out\.println|import\s+java\.|class\s+\w+\s*\{|package\s+[\w\.]+;/i },
+
+        // Python - weniger aggressiv
+        { lang: 'python', regex: /def\s+\w+|from\s+\w+\s+import|if\s+__name__\s*==|print\s*\(|elif\s+|input\s*\(/m },
+
         // TypeScript (vor JavaScript prüfen)
-        { lang: 'typescript', regex: /interface\s+\w+|type\s+\w+\s*=|:\s*(string|number|boolean|any)\s*[;,\)\{]|<.*>\s*\(/i },
-        
+        { lang: 'typescript', regex: /interface\s+\w+|type\s+\w+\s*=|:\s*(string|number|boolean|any)\s*[;,)\{]|<.*>\s*\(/i },
+
         // JavaScript
         { lang: 'javascript', regex: /function\s*\w*\s*\(|=>\s*\{?|console\.(log|error)|document\.|window\.|var\s+|let\s+|const\s+/i },
-        
-        // Java
-        { lang: 'java', regex: /public\s+(class|static|void)|private\s+|System\.out\.println|import\s+java\./i },
-        
+
         // Kotlin
         { lang: 'kotlin', regex: /fun\s+\w+|val\s+\w+|var\s+\w+|class\s+\w+.*\{|println\(/i },
-        
+
         // Elm
         { lang: 'elm', regex: /module\s+\w+|import\s+\w+(\.\w+)*|type\s+(alias\s+)?\w+|->|case\s+\w+\s+of/i }
       ];
 
       for (const pattern of patterns) {
         if (pattern.regex.test(code)) {
+          // Für JSON: Prüfe, ob keine Java-Schlüsselwörter enthalten sind
+          if (pattern.lang === 'json' && pattern.exclude && pattern.exclude.test(code)) {
+            continue;
+          }
           return pattern.lang;
         }
       }
@@ -460,43 +465,45 @@ print(greet("Anna"))`;
 
     // Variable to track if example is still active
     let isExampleActive = true;
-    // Variable to track if user has manually interacted
-    let userHasInteracted = false;
+  // Variable: User hat Sprache manuell gewählt
+  let userHasSelectedLanguage = false;
 
     // Function to handle input
     function handleInput() {
       const input = document.getElementById("input");
       const currentValue = input.value;
-      
-      // Mark that user has interacted if they changed anything
-      if (currentValue !== exampleCode) {
-        userHasInteracted = true;
-      }
-      
-      // Only show example again if user hasn't interacted yet
-      if (currentValue === "" && !userHasInteracted) {
-        input.value = exampleCode;
-        isExampleActive = true;
-      }
-      // If text is entered and it's not the example, deactivate example
-      else if (currentValue !== exampleCode) {
+      // Nur solange Sprache nicht manuell gewählt wurde, automatisch erkennen
+      // Wenn das Eingabefeld geleert wird, alles zurücksetzen
+      if (currentValue === "") {
         isExampleActive = false;
-        
-        // Automatic language detection only for new code (not example)
-        const detectedLang = detectLanguage(currentValue);
-        if (detectedLang) {
-          const langSelect = document.getElementById("lang");
-          if (langSelect.value !== detectedLang) {
-            langSelect.value = detectedLang;
-            // Small visual hint
-            langSelect.style.backgroundColor = '#e8f5e8';
-            setTimeout(() => {
-              langSelect.style.backgroundColor = '';
-            }, 1000);
+        userHasSelectedLanguage = false;
+        document.getElementById("preview").innerHTML = "";
+        document.getElementById("output").value = "";
+        updateHighlight();
+        return;
+      }
+      if (!userHasSelectedLanguage) {
+        // Beispielcode wiederherstellen, wenn noch nie verändert
+        if (currentValue === "" && !isExampleActive) {
+          input.value = exampleCode;
+          isExampleActive = true;
+        }
+        // Automatische Spracherkennung nur für neuen Code (nicht Beispiel)
+        else if (currentValue !== exampleCode) {
+          isExampleActive = false;
+          const detectedLang = detectLanguage(currentValue);
+          if (detectedLang) {
+            const langSelect = document.getElementById("lang");
+            if (langSelect.value !== detectedLang) {
+              langSelect.value = detectedLang;
+              langSelect.style.backgroundColor = '#e8f5e8';
+              setTimeout(() => {
+                langSelect.style.backgroundColor = '';
+              }, 1000);
+            }
           }
         }
       }
-      
       updateHighlight();
     }
 
@@ -514,7 +521,10 @@ print(greet("Anna"))`;
     // Live updates
     document.getElementById("input").addEventListener("input", handleInput);
     document.getElementById("input").addEventListener("focus", handleFocus);
-    document.getElementById("lang").addEventListener("change", updateHighlight);
+    document.getElementById("lang").addEventListener("change", function() {
+      userHasSelectedLanguage = true;
+      updateHighlight();
+    });
     document.getElementById("theme").addEventListener("change", updateHighlight);
     document.getElementById("lineNumbers").addEventListener("change", updateHighlight);
 

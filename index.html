@@ -172,8 +172,8 @@ print(greet("Anna"))</textarea>  <div class="controls">
       <label for="theme">Theme:</label>
       <select id="theme">
         <option value="light">Light</option>
-        <option value="dark" selected>Dark</option>
-        <option value="clean">Clean (transparent)</option>
+        <option value="dark">Dark</option>
+        <option value="clean" selected>Clean (transparent)</option>
       </select>
     </div>
 
@@ -185,11 +185,14 @@ print(greet("Anna"))</textarea>  <div class="controls">
   </div>
 
   <h2>👁️ Preview</h2>
-  <div id="preview"></div>
+  <div style="position:relative;">
+    <button class="copy-button" id="copyPreviewBtn" style="position:absolute;top:10px;right:15px;">📄 Copy Preview</button>
+    <div id="preview"></div>
+  </div>
 
   <div class="output-section">
     <h2>📋 HTML Code</h2>
-    <button class="copy-button" onclick="copyToClipboard()">📄 Copy</button>
+    <button class="copy-button" onclick="copyToClipboard()">📄 Copy Html Code</button>
     <textarea id="output" rows="20" style="width: 100%; box-sizing: border-box;" readonly></textarea>
   </div>
 
@@ -199,14 +202,12 @@ print(greet("Anna"))</textarea>  <div class="controls">
       const output = document.getElementById("output");
       output.select();
       output.setSelectionRange(0, 99999); // For mobile devices
-      
       try {
         document.execCommand('copy');
         const button = document.querySelector('.copy-button');
         const originalText = button.innerHTML;
         button.innerHTML = '✅ Copied!';
         button.classList.add('success');
-        
         setTimeout(() => {
           button.innerHTML = originalText;
           button.classList.remove('success');
@@ -214,10 +215,69 @@ print(greet("Anna"))</textarea>  <div class="controls">
       } catch (err) {
         console.error('Copy failed:', err);
       }
-      
-      // Remove selection
       output.blur();
     }
+
+    // Copy Preview function
+    async function copyPreviewToClipboard() {
+      const previewDiv = document.getElementById("preview");
+      let html = previewDiv.innerHTML;
+      // Nur beim Kopieren in Word/Clipboard-API: Leerzeichen nach Zeilennummer einfügen
+      if (navigator.clipboard && window.ClipboardItem) {
+        // Füge ein Leerzeichen nach jedem Zeilennummern-Span ein
+        html = html.replace(/(<span[^>]*style=[^>]*width:30px;[^>]*>\d+<\/span>)(?! )/g, '$1 ');
+        let success = false;
+        try {
+          const blob = new Blob([html], { type: 'text/html' });
+          const clipboardItem = new ClipboardItem({ 'text/html': blob });
+          await navigator.clipboard.write([clipboardItem]);
+          success = true;
+        } catch (err) {
+          success = false;
+        }
+        const button = document.getElementById('copyPreviewBtn');
+        const originalText = button.innerHTML;
+        if (success) {
+          button.innerHTML = '✅ Copied!';
+          button.classList.add('success');
+        } else {
+          button.innerHTML = '❌ Fehler';
+          button.classList.remove('success');
+        }
+        setTimeout(() => {
+          button.innerHTML = originalText;
+          button.classList.remove('success');
+        }, 2000);
+        return;
+      }
+      // Fallback: Kopiere als reiner Text (wie bisher)
+      let success = false;
+      const tempTextarea = document.createElement("textarea");
+      tempTextarea.value = html;
+      document.body.appendChild(tempTextarea);
+      tempTextarea.select();
+      tempTextarea.setSelectionRange(0, 99999);
+      try {
+        success = document.execCommand('copy');
+      } catch (err) {
+        success = false;
+      }
+      document.body.removeChild(tempTextarea);
+      const button = document.getElementById('copyPreviewBtn');
+      const originalText = button.innerHTML;
+      if (success) {
+        button.innerHTML = '✅ Copied!';
+        button.classList.add('success');
+      } else {
+        button.innerHTML = '❌ Fehler';
+        button.classList.remove('success');
+      }
+      setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('success');
+      }, 2000);
+    }
+    document.getElementById('copyPreviewBtn').addEventListener('click', copyPreviewToClipboard);
 
     // Farb-Mapping (Drei Themes)
     const colors = {
@@ -460,6 +520,8 @@ print(greet("Anna"))`;
 
     // Initial setup: set example and then highlight
     const input = document.getElementById("input");
+    const themeSelect = document.getElementById("theme");
+    themeSelect.value = "clean";
     if (input.value.trim() === "") {
       input.value = exampleCode;
       isExampleActive = true;
